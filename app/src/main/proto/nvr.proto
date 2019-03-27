@@ -1,0 +1,135 @@
+syntax = "proto3";
+
+//version = 1516
+
+package vms;
+
+import "google/protobuf/empty.proto";
+
+service NvrService {
+	rpc GetCameraList(CameraFilters) returns (CameraList) {}
+	rpc GetCameraStream(stream CameraStreamQ) returns (stream StreamFrame) {}
+	rpc GetRecordDetails(CameraQ) returns (RecordDetails){}
+}
+
+message CameraFilters {
+	enum Filter {
+		NONE = 0x00;
+		DISABLED = 0x01;
+		NONRECORDING = 0x02;
+	}
+	Filter filter_out = 1;
+}
+
+message CameraList {
+	repeated CameraInfo list = 1;
+}
+
+message CameraQ {
+	string unique_id = 1;
+	string ip_address = 2;
+}
+
+message CameraStream {
+	enum MediaType {
+		MEDIA_VIDEO = 0;
+		MEDIA_AUDIO = 1;
+		MEDIA_METADATA = 2;
+	}
+	enum CodecType {
+		CODEC_H264 = 0;
+		CODEC_H265 = 1;
+	}
+	enum ResolutionProfile {
+		R_BEST = 0;
+		R_HIGH = 1;
+		R_MEDIUM = 2;
+		R_LOW = 3;
+		R_LOWEST = 4;
+		R_CUSTOM = 5;
+	}
+	enum QualityProfile {
+		Q_BEST = 0;
+		Q_HIGH = 1;
+		Q_MEDIUM = 2;
+		Q_LOW = 3;
+		Q_LOWEST = 4;
+		Q_AUTO_WIFI = 5;
+		Q_AUTO_LTE = 6;
+		Q_AUTO_3G = 7;
+	}
+	enum StreamMode {
+		LIVE_STREAM = 0;
+		PLAYBACK_STREAM = 1;
+	}
+	MediaType media = 1;
+	CodecType codec = 2;
+	QualityProfile qprofile = 3;
+	ResolutionProfile rprofile = 4;
+	double frame_rate = 5;
+	StreamMode stream_mode = 6;
+}
+
+message PlaybackChanges {
+	enum PlaybackChangesTypes {
+		PC_NONE = 0;
+		PC_SEEK_RELATIVE = 1;
+		PC_SEEK_ABSOLUTE = 2;
+		PC_PLAY_FAST = 3;
+	}
+	int64 value = 1;
+	PlaybackChangesTypes type = 2;
+}
+
+message CameraStreamQ {
+	string unique_id = 1;
+	repeated CameraStream streams = 2;
+	int64 begin_ts = 3;
+	PlaybackChanges pc = 4;
+}
+
+message StreamBuffer {
+	bytes data = 1;
+	string md5 = 2;
+	bool chunked = 3;
+	int32 flags = 4;
+	int64 ts = 5;
+}
+
+message StreamFrame {
+	repeated CameraStream info = 1;
+	repeated StreamBuffer data = 2;
+}
+
+message RecordDetail {
+	int64 begin_time = 1;
+	int64 end_time = 2;
+}
+
+message RecordDetails {
+	int64 record_begin_time = 1;
+	int64 record_end_time = 2;
+	repeated RecordDetail detail = 3;
+}
+
+message CameraInfo {
+	string ip_address = 1;
+	string model = 2;
+	string unique_id = 3;
+	string rtsp_main_stream = 4;
+	string rtsp_sec_stream = 5;
+	bool enabled = 6;
+	string recordStream = 7;
+	int32 rtsp_port = 8;
+	string onvif_uri = 9;
+	bool discovered = 10;
+	string record_path = 11;
+	string friendly_name = 12;
+	string producer = 13;
+	string rtsp_user_name = 14;
+	string rtsp_password = 15;
+}
+
+message Dummy {
+	string val = 1;
+}
