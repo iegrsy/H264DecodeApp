@@ -110,6 +110,7 @@ public class H264Decoder {
             int frameIndex = 0;
             StreamData.RAWFrame frame;
 
+            MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
             while (isRun) {
                 if (mData.getFrames().size() <= 0)
                     continue;
@@ -125,7 +126,6 @@ public class H264Decoder {
                     Objects.requireNonNull(mDecoder.getInputBuffer(inIndex)).put(frame.frameData);
                     mDecoder.queueInputBuffer(inIndex, 0, frame.frameData.length, 0, MediaCodec.CRYPTO_MODE_UNENCRYPTED);
 
-                    MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
                     int outIndex = mDecoder.dequeueOutputBuffer(info, TIMEOUT_U_SEC);
                     switch (outIndex) {
                         case MediaCodec.INFO_TRY_AGAIN_LATER:
@@ -175,7 +175,7 @@ public class H264Decoder {
         MediaFormat mediaFormat = MediaFormat.createVideoFormat(MIME_TYPE, mMediaCodecWidth, mMediaCodecHeight);
         mediaFormat.setByteBuffer("csd-0", ByteBuffer.wrap(mData.getHeader_sps()));
         mediaFormat.setByteBuffer("csd-1", ByteBuffer.wrap(mData.getHeader_pps()));
-        mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, (int) FRAME_RATE);
+        mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, (int) mFrameRate);
 
         try {
             mDecoder = MediaCodec.createDecoderByType(MIME_TYPE);
